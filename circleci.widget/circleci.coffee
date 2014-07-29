@@ -1,86 +1,90 @@
-CIRCLECI_TOKEN = 'YOUR_TOKEN_HERE'
+CIRCLECI_TOKEN   = 'YOUR_TOKEN_HERE'
 SHOW_BUILD_COUNT = 5
 
-command: "curl -s -H 'Accept: application/json' 'https://circleci.com/api/v1/recent-builds?circle-token=#{ CIRCLECI_TOKEN }&limit=#{ SHOW_BUILD_COUNT }'"
+colors =
+  standard: '#525252'
+  queued  : '#999999'
+  running : '#525252'
+  success : '#80b95b'
+  failed  : '#ff1e7a'
+  fixed   : '#80b95b'
+
+command: "curl -sS -H 'Accept: application/json' 'https://circleci.com/api/v1/recent-builds?circle-token=#{ CIRCLECI_TOKEN }&limit=#{ SHOW_BUILD_COUNT }'"
 
 refreshFrequency: 30000
 
 style: """
-  bottom: 100px
-  left: 60px
+  top: 20px
+  left: 4px
   margin: 0 auto
-  color: #3a3a3a
-  font-family: Helvetica Neue
+  font-family: Myriad Set Pro, Helvetica Neue
   font-weight: 300
-  font-smoothing: antialiased
+  font-smoothing: antialias
 
-  table
+  td
+    padding: 4px 8px
+    font-size: 14px
+    color: #{colors.standard}
 
-    td
-      padding: 4px 8px
-      font-size: 14px
+    .status
+      margin: 2px 0
+      padding: 0
+      font-size: 12px
+      font-weight: normal
 
-      .status
-        margin: 2px 0
-        padding: 0
-        font-size: 13px
-        font-weight: normal
+    .project
+      font-size: 11px
+      font-weight: normal
+      vertical-align: 2px
+      margin-left: 4px
+      font-family: Ubuntu Mono, Menlo
+      opacity: 0.8
 
-      .project
-        font-size: 11px
-        color: #3a3a3a
-        font-weight: normal
-        vertical-align: 2px
-        margin-left: 4px
-        font-family: Menlo
+  .build_status .status
+    width: 21px
+    height: 21px
+    border: 2px solid
+    border-radius: 100%
 
-    .build_status .status
-      width: 21px
-      height: 21px
-      border: 2px solid
-      border-radius: 100%
+  .not_running .status
+    border-color: #{colors.queued}
+    color:  #{colors.queued}
 
-    .not_running .status
-      border-color: #aaa
-      color: #aaa
+  .running .status
+    border-color: rgba(#{colors.running}, 0.2)
+    color: #{colors.running}
+    border-top-color: #{colors.running}
 
-    .running .status
-      border-color: rgba(#fff, 0.2)
-      color: #3a3a3a
-      border-top-color: #f0f0f0
+  .running .build_status .status
+    animation: spin 1s infinite
+    animation-timing-function: linear
 
-    .running .build_status .status
-      animation: spin 1s infinite
-      animation-timing-function: linear
+  .fixed .status
+    border-color: #{colors.fixed}
+    color: #{colors.fixed}
 
-    .fixed .status
-      border-color: #f7b441
-      color: #dfa971
+  .fixed .build_status .status
+    background: rgba(#{colors.fixed}, 0.1)
 
-    .fixed .build_status .status
-      background: rgba( #dfa971, 0.1)
+  .success .status
+    border-color: #{colors.success}
+    color: #{colors.success}
 
-    .success .status
-      border-color: #80b95b
-      color:  #80b95b
+  .success .build_status .status
+    background: rgba(#{colors.success}, 0.1)
 
-    .success .build_status .status
-      background: rgba(#80b95b, 0.1)
+  .failed .status
+    border-color: #{colors.failed}
+    color: #{colors.failed}
 
-    .failed .status
-      border-color: #ff1e7a
-      color: #ff1e7a
+  .failed .build_status .status
+    background: rgba(#{colors.failed}, 0.1)
 
-    .failed .build_status .status
-      background: rgba(#ff1e7a, 0.1)
+  .canceled
+    opacity: 0.5
 
-    .canceled
-      opacity: 0.5
-
-      .branch
-        text-decoration: line-through
-
-
+    .branch
+      text-decoration: line-through
 """
 
 render: -> """
@@ -89,7 +93,6 @@ render: -> """
       @-webkit-keyframes spin {
         from {
           -webkit-transform: rotate(0deg);
-
         }
         to {
           -webkit-transform: rotate(360deg);
@@ -101,7 +104,6 @@ render: -> """
 """
 
 update: (output, domEl) ->
-  console.log output
   builds = JSON.parse(output)
   table  = $(domEl).find('table')
 
